@@ -3,7 +3,7 @@
 ### Домашняя работа 6: Файловые системы и LVM (реализована на Debian 12)
 ---
 ### Домашнее задание:
-   - Уменьшить том под / до 3GB.  
+   - Уменьшить том под / до 8GB.  
    - Выделить том под /home.  
    - Выделить том под /var - сделать в mirror.
    - /home - сделать том для снапшотов. 
@@ -37,9 +37,9 @@ tmpfs                    tmpfs      97M     0   97M   0% /run/user/0
 `lsblk`
 ```
 NAME             MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
-sda                8:0    0    5G  0 disk
+sda                8:0    0   20G  0 disk
 ├─sda1             8:1    0  476M  0 part /boot
-└─sda2             8:2    0  4.5G  0 part
+└─sda2             8:2    0 19.5G  0 part
   ├─VG_ROOT-root 254:0    0  3.4G  0 lvm  /
   └─VG_ROOT-swap 254:1    0  1.2G  0 lvm  [SWAP]
 sdb                8:16   0   10G  0 disk
@@ -112,3 +112,28 @@ Processing triggers for libc-bin (2.36-9+deb12u8) ...
 ```
   Physical volume "/dev/sdb" successfully created.
 ```
+</details>
+
+Создадим Volume group **vg_root** на разделе **/dev/sdb**:
+
+`vgcreate vg_root /dev/sdb`
+
+<details>
+<summary> результат выполнения команды: </summary>
+
+```
+  Volume group "vg_root" successfully created
+```
+</details>
+
+Создадим Logical Volume **lv_root** на Volume Group **vg_root**:
+
+`lvcreate -n lv_root -l +100%FREE /dev/vg_root`
+
+<details>
+<summary> результат выполнения команды: </summary>
+
+```
+  Logical volume "lv_root" created.
+```
+</details>
