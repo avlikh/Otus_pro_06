@@ -321,6 +321,55 @@ chroot /mnt/
 update-initramfs: Generating /boot/initrd.img-6.1.0-18-amd64
 ```
 </details>
+
+перезапустим сервер:
+
+`exit && init 6`
+
 ##### 1.5 Изменим размер старой VG и вернем на него /
 
-Удаляем старый LV размером в 40G и создаём новый на 8G
+Удаляем старый LV размером в 18.3G и создаём новый на 8G
+
+`lvremove /dev/VG_ROOT/root`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+Do you really want to remove active logical volume VG_ROOT/root? [y/n]: y
+  Logical volume "root" successfully removed.
+```
+</details>
+
+` lvcreate -n VG_ROOT/root -L 8G /dev/VG_ROOT`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+  Logical volume "root" created.
+```
+</details>
+
+Создадим файловую систему xfs на разделе **/dev/VG_ROOT/root**
+
+`mkfs.xfs /dev/VG_ROOT/root`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+meta-data=/dev/VG_ROOT/root      isize=512    agcount=4, agsize=524288 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
+data     =                       bsize=4096   blocks=2097152, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=16384, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+Discarding blocks...Done.
+```
+</details>
+
