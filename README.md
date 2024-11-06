@@ -262,6 +262,27 @@ for i in /proc/ /sys/ /dev/ /run/ /boot/; \
 do mount --bind $i /mnt/$i; done
 chroot /mnt/
 ```
-Поищем строки содержащие старый / раздел в файлах **/etc/fstab** и **/boot/grub/grub.cfg**
+Поищем строки содержащие старый **/** раздел в файлах **/etc/fstab** и **/boot/grub/grub.cfg**
 
-`cat /etc/fstab | grep VG_ROOT && cat /boot/grub/grub.cfg | grep VG_ROOT`
+`cat /etc/fstab | grep VG_ROOT`
+
+<details>
+<summary> результат выполнения команды: </summary>
+
+```
+/dev/mapper/VG_ROOT-root /               xfs     defaults        0       0
+/dev/mapper/VG_ROOT-swap none            swap    sw              0       0
+```
+</details>
+
+`cat /boot/grub/grub.cfg | grep VG_ROOT`
+
+<details>
+<summary> результат выполнения команды: </summary>
+
+```
+        linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/VG_ROOT-root ro  quiet
+                linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/VG_ROOT-root ro  quiet
+                linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/VG_ROOT-root ro single
+```
+</details>
