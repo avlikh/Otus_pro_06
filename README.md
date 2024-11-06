@@ -286,3 +286,38 @@ chroot /mnt/
                 linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/VG_ROOT-root ro single
 ```
 </details>
+
+Выполним замену **VG_ROOT-root** на **vg_root-lv_root** в файлах **/etc/fstab** и **/boot/grub/grub.cfg** и проверим что замена произошла:  
+`sed -i 's/VG_ROOT-root/vg_root-lv_root/g' /etc/fstab && cat /etc/fstab | grep vg_root-lv_root`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+/dev/mapper/vg_root-lv_root /               xfs     defaults        0       0
+```
+</details>
+
+`sed -i 's/VG_ROOT-root/vg_root-lv_root/g' /boot/grub/grub.cfg && cat /boot/grub/grub.cfg | grep vg_root-lv_root`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+        linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/vg_root-lv_root ro  quiet
+                linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/vg_root-lv_root ro  quiet
+                linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/vg_root-lv_root ro single
+```
+</details>
+
+**Обновим образ initrd**
+
+`update-initramfs -c -k all`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+update-initramfs: Generating /boot/initrd.img-6.1.0-18-amd64
+```
+</details>
