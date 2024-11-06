@@ -137,3 +137,33 @@ Processing triggers for libc-bin (2.36-9+deb12u8) ...
   Logical volume "lv_root" created.
 ```
 </details>
+
+Создадим файловую систему **xfs** на созданном Logical volume **lv_root**:
+
+`mkfs.xfs /dev/vg_root/lv_root`
+
+<details>
+<summary> результат выполнения команды: </summary>
+
+```
+meta-data=/dev/vg_root/lv_root   isize=512    agcount=4, agsize=655104 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
+data     =                       bsize=4096   blocks=2620416, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=16384, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+Discarding blocks...Done.
+```
+</details>
+
+Смонтируем раздел **/dev/vg_root/lv_root** в **/mnt**:
+
+`mount /dev/vg_root/lv_root /mnt`
+
+Скопируем все данные с раздела **/** в **/mnt**:
+
+`mount /dev/vg_root/lv_root /mnt`
