@@ -324,7 +324,8 @@ update-initramfs: Generating /boot/initrd.img-6.1.0-18-amd64
 
 перезапустим сервер:
 
-`exit && init 6`
+`exit`
+`init 6`
 
 ##### 1.5 Изменим размер старой VG и вернем на него /
 
@@ -373,3 +374,184 @@ Discarding blocks...Done.
 ```
 </details>
 
+Смонтируем раздел **/dev/VG_ROOT/root** в **/mnt**:
+
+`mount /dev/VG_ROOT/root /mnt`
+
+**1.6 Скопируем все данные с раздела / в /mnt:**
+
+`xfsdump -J - /dev/vg_root/lv_root | xfsrestore -J - /mnt`
+
+<details>
+<summary> результат выполнения команды: </summary>
+
+```
+xfsdump: xfsrestore: using file dump (drive_simple) strategy
+xfsrestore: version 3.1.11 (dump format 3.0)
+using file dump (drive_simple) strategy
+xfsdump: version 3.1.11 (dump format 3.0)
+xfsdump: level 0 dump of testdeb1:/
+xfsdump: dump date: Wed Nov  6 20:54:51 2024
+xfsdump: session id: 6444dff8-ef42-432f-9a19-c93aee74cf97
+xfsdump: session label: ""
+xfsdump: ino map phase 1: constructing initial dump list
+xfsrestore: searching media for dump
+xfsdump: ino map phase 2: skipping (no pruning necessary)
+xfsdump: ino map phase 3: skipping (only one dump stream)
+xfsdump: ino map construction complete
+xfsdump: estimated dump size: 1320192576 bytes
+xfsdump: creating dump session media file 0 (media 0, file 0)
+xfsdump: dumping ino map
+xfsdump: dumping directories
+xfsrestore: examining media file 0
+xfsrestore: dump description:
+xfsrestore: hostname: testdeb1
+xfsrestore: mount point: /
+xfsrestore: volume: /dev/mapper/vg_root-lv_root
+xfsrestore: session time: Wed Nov  6 20:54:51 2024
+xfsrestore: level: 0
+xfsrestore: session label: ""
+xfsrestore: media label: ""
+xfsrestore: file system id: 6a00053a-8456-4b29-86e3-d051a23d80bf
+xfsrestore: session id: 6444dff8-ef42-432f-9a19-c93aee74cf97
+xfsrestore: media id: 5a1cc11c-b2fa-44bd-9a94-c9de3b76d231
+xfsrestore: searching media for directory dump
+xfsrestore: reading directories
+xfsdump: dumping non-directory files
+xfsrestore: 3373 directories and 33177 entries processed
+xfsrestore: directory post-processing
+xfsrestore: restoring non-directory files
+xfsdump: ending media file
+xfsdump: media file size 1282599736 bytes
+xfsdump: dump size (non-dir files) : 1264722464 bytes
+xfsdump: dump complete: 17 seconds elapsed
+xfsdump: Dump Status: SUCCESS
+xfsrestore: restore complete: 17 seconds elapsed
+xfsrestore: Restore Status: SUCCESS
+```
+</details>
+
+Проверим, что содержимое раздела **/** скопировалось в **/mnt**:
+
+`ls -la /mnt`
+
+<details>
+<summary> результат выполнения команды: </summary>
+
+```
+total 8
+drwxr-xr-x 17 root root  298 Nov  6 20:55 .
+drwxr-xr-x 17 root root  298 Nov  6 13:58 ..
+lrwxrwxrwx  1 root root    7 Nov  6 20:54 bin -> usr/bin
+drwxr-xr-x  2 root root    6 Nov  5 17:06 boot
+drwxr-xr-x  4 root root  182 Nov  5 17:06 dev
+drwxr-xr-x 68 root root 4096 Nov  6 19:34 etc
+drwxr-xr-x  3 root root   18 Nov  5 17:10 home
+lrwxrwxrwx  1 root root   30 Nov  6 20:54 initrd.img -> boot/initrd.img-6.1.0-18-amd64
+lrwxrwxrwx  1 root root   30 Nov  6 20:54 initrd.img.old -> boot/initrd.img-6.1.0-18-amd64
+lrwxrwxrwx  1 root root    7 Nov  6 20:54 lib -> usr/lib
+lrwxrwxrwx  1 root root    9 Nov  6 20:54 lib64 -> usr/lib64
+drwxr-xr-x  3 root root   33 Nov  5 17:06 media
+drwxr-xr-x  2 root root    6 Nov  5 17:06 mnt
+drwxr-xr-x  2 root root    6 Nov  5 17:06 opt
+drwxr-xr-x  2 root root    6 Jan 29  2024 proc
+drwx------  4 root root   84 Nov  5 18:45 root
+drwxr-xr-x  2 root root    6 Nov  5 17:11 run
+lrwxrwxrwx  1 root root    8 Nov  6 20:54 sbin -> usr/sbin
+drwxr-xr-x  2 root root    6 Nov  5 17:06 srv
+drwxr-xr-x  2 root root    6 Jan 29  2024 sys
+drwxrwxrwt  8 root root  250 Nov  6 20:38 tmp
+drwxr-xr-x 12 root root  133 Nov  5 17:06 usr
+drwxr-xr-x 11 root root  139 Nov  5 17:06 var
+lrwxrwxrwx  1 root root   27 Nov  6 20:54 vmlinuz -> boot/vmlinuz-6.1.0-18-amd64
+lrwxrwxrwx  1 root root   27 Nov  6 20:54 vmlinuz.old -> boot/vmlinuz-6.1.0-18-amd64
+```
+</details>
+
+
+##### 1.7 Сконфигурируем grub для того, чтобы при старте перейти в новый /  
+Сымитируем текущий root, сделаем в него chroot и обновим grub:
+
+```
+for i in /proc/ /sys/ /dev/ /run/ /boot/; \
+do mount --bind $i /mnt/$i; done
+chroot /mnt/
+```
+Поищем строки содержащие старый **/** раздел в файлах **/etc/fstab** и **/boot/grub/grub.cfg**
+
+`cat /etc/fstab | grep vg_root`
+
+<details>
+<summary> результат выполнения команды: </summary>
+
+```
+/dev/mapper/vg_root-lv_root /               xfs     defaults        0       0
+```
+</details>
+
+`cat /boot/grub/grub.cfg | grep vg_root`
+
+<details>
+<summary> результат выполнения команды: </summary>
+
+```
+        linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/vg_root-lv_root ro  quiet
+                linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/vg_root-lv_root ro  quiet
+                linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/vg_root-lv_root ro single
+```
+</details>
+
+Выполним замену **vg_root-lv_root** на **VG_ROOT-root** в файлах **/etc/fstab** и **/boot/grub/grub.cfg** и проверим что замена произошла:  
+`sed -i 's/vg_root-lv_root/VG_ROOT-root/g' /etc/fstab && cat /etc/fstab | grep VG_ROOT-root`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+/dev/mapper/VG_ROOT-root /               xfs     defaults        0       0
+```
+</details>
+
+`sed -i 's/vg_root-lv_root/VG_ROOT-root/g' /boot/grub/grub.cfg && cat /boot/grub/grub.cfg | grep VG_ROOT-root`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+        linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/VG_ROOT-root ro  quiet
+                linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/VG_ROOT-root ro  quiet
+                linux   /vmlinuz-6.1.0-18-amd64 root=/dev/mapper/VG_ROOT-root ro single
+```
+</details>
+
+**Обновим образ initrd**
+
+`update-initramfs -c -k all`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+update-initramfs: Generating /boot/initrd.img-6.1.0-18-amd64
+```
+</details>
+
+перезапустим сервер:
+
+`exit`
+`init 6`
+
+Проверим что раздел **/** уменьшился до 8 GB:
+
+`df -h | grep -e Filesystem -e VG_ROOT-root && lsblk | grep -e NAME -e VG_ROOT-root`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+Filesystem                Size  Used Avail Use% Mounted on
+/dev/mapper/VG_ROOT-root  8.0G  1.4G  6.7G  17% /
+NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+  └─VG_ROOT-root  254:2    0    8G  0 lvm  /
+```
+</details>
