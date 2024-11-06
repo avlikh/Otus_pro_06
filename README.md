@@ -28,7 +28,7 @@
 Filesystem               Type      Size  Used Avail Use% Mounted on
 udev                     devtmpfs  457M     0  457M   0% /dev
 tmpfs                    tmpfs      97M  508K   96M   1% /run
-/dev/mapper/VG_ROOT-root xfs       3.3G  1.3G  2.0G  40% /
+/dev/mapper/VG_ROOT-root xfs      18.3G  1.3G 17.0G  93% /
 tmpfs                    tmpfs     481M     0  481M   0% /dev/shm
 tmpfs                    tmpfs     5.0M     0  5.0M   0% /run/lock
 /dev/sda1                ext2      444M   60M  380M  14% /boot
@@ -40,7 +40,7 @@ NAME             MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 sda                8:0    0   20G  0 disk
 ├─sda1             8:1    0  476M  0 part /boot
 └─sda2             8:2    0 19.5G  0 part
-  ├─VG_ROOT-root 254:0    0  3.4G  0 lvm  /
+  ├─VG_ROOT-root 254:0    0 18.3G  0 lvm  /
   └─VG_ROOT-swap 254:1    0  1.2G  0 lvm  [SWAP]
 sdb                8:16   0   10G  0 disk
 sdc                8:32   0    2G  0 disk
@@ -254,7 +254,7 @@ lrwxrwxrwx  1 root root   27 Nov  6 13:58 vmlinuz.old -> boot/vmlinuz-6.1.0-18-a
 ```
 </details>
 
-##### Сконфигурируем grub для того, чтобы при старте перейти в новый /  
+##### 1.4 Сконфигурируем grub для того, чтобы при старте перейти в новый /  
 Сымитируем текущий root, сделаем в него chroot и обновим grub:
 
 ```
@@ -321,3 +321,6 @@ chroot /mnt/
 update-initramfs: Generating /boot/initrd.img-6.1.0-18-amd64
 ```
 </details>
+##### 1.5 Изменим размер старой VG и вернем на него /
+
+Удаляем старый LV размером в 40G и создаём новый на 8G
