@@ -555,3 +555,6 @@ NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
   └─VG_ROOT-root  254:2    0    8G  0 lvm  /
 ```
 </details>
+
+---
+### 2) Выделим том под /home
