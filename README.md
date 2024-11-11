@@ -558,3 +558,19 @@ NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 
 ---
 ### 2) Выделим том под /home
+
+`lvcreate -n LogVol_Home -L 2G /dev/VolGroup00`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+Filesystem                Size  Used Avail Use% Mounted on
+/dev/mapper/VG_ROOT-root  8.0G  1.4G  6.7G  17% /
+NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+  └─VG_ROOT-root  254:2    0    8G  0 lvm  /
+```
+</details>
+
+---
+### 3)Выделить том под /var - сделать в mirror
