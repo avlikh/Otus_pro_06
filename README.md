@@ -685,3 +685,74 @@ Writing superblocks and filesystem accounting information: done
 Правим **fstab** для автоматического монтирования **/home**:
 
 `echo "/dev/mapper/VG_VAR-var /var ext4 defaults 0 0" >> /etc/fstab`
+
+---
+### 4)Работа со снапшотами
+
+Нагенерим файлов в **/home**:
+
+`touch /home/test_file{1..20}`  
+
+Снимем снапшот c раздела **/home**:  
+`lvcreate -L 100MB -s -n home_snap /dev/VG_ROOT/home`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+  Logical volume "home_snap" created.
+```
+</details>
+
+Удалим часть файлов из **/home**:
+
+`rm -f /home/test_file{11..20}`  
+
+Восстановим из снапшота:  
+
+`umount /home`  
+
+`lvconvert --merge /dev/VG_ROOT/home_snap`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+  Merging of volume VG_ROOT/home_snap started.
+  VG_ROOT/home: Merged: 100.00%
+```
+</details>  
+
+`systemctl daemon-reload && mount /dev/VG_ROOT/home /home`  
+
+`ls -la /home`
+
+<summary> результат выполнения команды: </summary>
+   
+```
+total 4
+drwxr-xr-x  3 root root 4096 Nov 12 20:02 .
+drwxr-xr-x 17 root root  298 Nov  6 20:55 ..
+drwx------  2 alex alex   78 Nov  5 18:45 alex
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file1
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file10
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file11
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file12
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file13
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file14
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file15
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file16
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file17
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file18
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file19
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file2
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file20
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file3
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file4
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file5
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file6
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file7
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file8
+-rw-r--r--  1 root root    0 Nov 12 20:02 test_file9
+```
+</details>  
