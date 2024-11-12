@@ -557,7 +557,7 @@ NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 </details>
 
 ---
-### 2) Выделим том под /home
+### 2) Выделить том под /home
 
 `lvcreate -n home -L 2G /dev/VolGroup00`
 
@@ -607,3 +607,81 @@ Discarding blocks...Done.
 
 ---
 ### 3)Выделить том под /var - сделать в mirror
+
+`pvcreate /dev/sdd /dev/sde`  
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+WARNING: xfs signature detected on /dev/VG_ROOT/home at offset 0. Wipe it? [y/n]: y
+  Physical volume "/dev/sdd" successfully created.
+  Physical volume "/dev/sde" successfully created.
+```
+</details>
+
+`vgcreate VG_VAR /dev/sdd /dev/sde`  
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+  Volume group "VG_VAR" successfully created
+```
+</details>
+
+`lvcreate -L 950M -m1 -n var VG_VAR`  
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+  Rounding up size to full physical extent 952.00 MiB
+  Logical volume "var" created.
+```
+</details>  
+
+Создаем на нем ФС и перемещаем туда **/var**  
+Ради разнообразия создадим fs **ext4**:  
+
+`mkfs.ext4 /dev/VG_VAR/var`  
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+mke2fs 1.47.0 (5-Feb-2023)
+Discarding device blocks: done
+Creating filesystem with 243712 4k blocks and 60928 inodes
+Filesystem UUID: b9b04d69-b93e-4cf8-924a-9cf579ac8d75
+Superblock backups stored on blocks:
+        32768, 98304, 163840, 229376
+
+Allocating group tables: done
+Writing inode tables: done
+Creating journal (4096 blocks): done
+Writing superblocks and filesystem accounting information: done
+```
+</details>
+
+`systemctl daemon-reload && mount /dev/VG_VAR/var /mnt`  
+
+Скопируем данные с **/var** в **/mnt**  
+
+`cp -aR /var/* /mnt/`  
+
+На всякий случай сохраняем содержимое старого **var**:
+
+`mkdir /tmp/oldvar && mv /var/* /tmp/oldvar`  
+
+Размонтируем **/mnt**  
+
+`umount /mnt`  
+
+Монтируем новый var в каталог **/var**:  
+
+`mount /dev/VG_VAR/var /var`
+
+Правим **fstab** для автоматического монтирования **/home**:
+
+`echo "/dev/mapper/VG_VAR-var /var ext4 defaults 0 0" >> /etc/fstab`
