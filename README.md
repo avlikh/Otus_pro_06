@@ -727,6 +727,7 @@ Writing superblocks and filesystem accounting information: done
 
 `ls -la /home`
 
+<details>
 <summary> результат выполнения команды: </summary>
    
 ```
@@ -754,5 +755,27 @@ drwx------  2 alex alex   78 Nov  5 18:45 alex
 -rw-r--r--  1 root root    0 Nov 12 20:02 test_file7
 -rw-r--r--  1 root root    0 Nov 12 20:02 test_file8
 -rw-r--r--  1 root root    0 Nov 12 20:02 test_file9
+```
+</details>  
+
+перезапустим сервер и проверим что все разделы автомонтируются при запуске:
+`init 6`  
+
+`df -hT`  
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+Filesystem               Type      Size  Used Avail Use% Mounted on
+udev                     devtmpfs  457M     0  457M   0% /dev
+tmpfs                    tmpfs      97M  568K   96M   1% /run
+/dev/mapper/VG_ROOT-root xfs       8.0G  1.1G  7.0G  13% /
+tmpfs                    tmpfs     481M     0  481M   0% /dev/shm
+tmpfs                    tmpfs     5.0M     0  5.0M   0% /run/lock
+/dev/mapper/VG_ROOT-home xfs       2.0G   47M  1.9G   3% /home
+/dev/sda1                ext2      444M   60M  380M  14% /boot
+/dev/mapper/VG_VAR-var   ext4      919M  329M  527M  39% /var
+tmpfs                    tmpfs      97M     0   97M   0% /run/user/0
 ```
 </details>  
