@@ -559,18 +559,51 @@ NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 ---
 ### 2) Выделим том под /home
 
-`lvcreate -n LogVol_Home -L 2G /dev/VolGroup00`
+`lvcreate -n home -L 2G /dev/VolGroup00`
 
 <details>
 <summary> результат выполнения команды: </summary>
    
 ```
-Filesystem                Size  Used Avail Use% Mounted on
-/dev/mapper/VG_ROOT-root  8.0G  1.4G  6.7G  17% /
-NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
-  └─VG_ROOT-root  254:2    0    8G  0 lvm  /
+WARNING: xfs signature detected on /dev/VG_ROOT/home at offset 0. Wipe it? [y/n]: y
+  Wiping xfs signature on /dev/VG_ROOT/home.
+  Logical volume "home" created.
 ```
 </details>
+
+`mkfs.xfs /dev/VG_ROOT/home`
+
+<details>
+<summary> результат выполнения команды: </summary>
+   
+```
+meta-data=/dev/VG_ROOT/home      isize=512    agcount=4, agsize=131072 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1    bigtime=1 inobtcount=1 nrext64=0
+data     =                       bsize=4096   blocks=524288, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=16384, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+Discarding blocks...Done.
+```
+</details>
+
+`mount /dev/VG_ROOT/home /mnt/`  
+
+`cp -aR /home/* /mnt/`  
+
+`rm -rf /home/*`  
+
+`umount /mnt`  
+
+`mount /dev/VG_ROOT/home /home/`  
+
+Правим **fstab** для автоматического монтирования **/home**:
+
+`echo "/dev/VG_ROOT/home /home xfs defaults 0 0" >> /etc/fstab`
 
 ---
 ### 3)Выделить том под /var - сделать в mirror
